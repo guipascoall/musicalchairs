@@ -71,6 +71,12 @@ public:
     }
 
     void parar_musica() {
+        // Anuncia que a música parou antes de qualquer jogador tentar se sentar
+        {
+            std::lock_guard<std::mutex> lock(cout_mutex);
+            std::cout << "\n> A música parou! Os jogadores estão tentando se sentar...\n";
+        }
+
         {
             std::lock_guard<std::mutex> lock(jogo_mutex);
             rodada_terminada = false;
@@ -79,12 +85,7 @@ public:
         musica_parada = true;
         music_cv.notify_all();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-        {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            std::cout << "\n> A música parou! Os jogadores estão tentando se sentar...\n";
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Dê tempo para que todos as threads possam ler a notificação
     }
 
     bool tentar_sentar(int id) {
